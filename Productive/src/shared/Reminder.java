@@ -1,20 +1,18 @@
 package shared;
 import org.json.simple.JSONObject;
 
-import java.util.Map;
-
 public class Reminder {
-	private String reminderId;
-	private String body;
-	private ProductiveDate createdDate;
+	private String reminderId = null;
+	private String body = null;
+	private ProductiveDate createdDate = null;
 	
-	public Reminder(Map<String, String> jsonIn) {
-		setReminderId(jsonIn.get(Reminder.REMINDER_ID_KEY));
-		setBody(jsonIn.get(Reminder.BODY_KEY));
+	public Reminder(JSONObject jsonIn) {
+		setReminderId(jsonIn.get(REMINDER_ID_KEY).toString());
+		setBody(jsonIn.get(BODY_KEY).toString());
 		
-		String createdDateStr = jsonIn.get(Reminder.CREATED_DATE_KEY);
+		String dateStr = jsonIn.get(CREATED_DATE_KEY).toString();
 		
-		setCreatedDate(new ProductiveDate(createdDateStr));
+		setCreatedDate(new ProductiveDate(dateStr));
 	}
 	
 	public Reminder(String body) {
@@ -25,8 +23,9 @@ public class Reminder {
 	public Reminder() {};
 	
 	/**
-	 * For use of posting to the server, no reminderID is set yet.
-	 * @return JSONObject to post to server.
+	 * Since editing is not allowed with a reminder the object you can only create a JSONObject not edit it,
+	 * Due to this, this method will return a jsonObject with no reminderID
+	 * @return 
 	 */
 	public JSONObject encodeToJson() {
 		JSONObject jsonObj = new JSONObject();

@@ -11,12 +11,19 @@ public class Note {
 	
 	public Note(JSONObject jsonIn) {
 		setTitle(jsonIn.get(TITLE_KEY).toString());
-		setBody(jsonIn.get(BODY_KEY).toString());
+		
+		if(jsonIn.get(BODY_KEY)!=null) {
+			setBody(jsonIn.get(BODY_KEY).toString());
+		} else {setBody(null);}
+		
 		setNoteId(jsonIn.get(NOTE_ID_KEY).toString());
 		
+		String updatedDateStr = null;
 		String createdDateStr = jsonIn.get(CREATED_DATE_KEY).toString();
-		String updatedDateStr = jsonIn.get(UPDATED_LAST_DATE_KEY).toString();
-		
+		if(jsonIn.get(UPDATED_LAST_DATE_KEY)!=null) {
+			updatedDateStr = jsonIn.get(UPDATED_LAST_DATE_KEY).toString();
+		}
+
 		setCreatedDate(new ProductiveDate(createdDateStr));
 		setUpdatedLastDate(new ProductiveDate(updatedDateStr));
 	}

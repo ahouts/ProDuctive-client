@@ -28,6 +28,15 @@ public class ProductiveDate {
 		return new SimpleDateFormat("dd-MM-yyyy:HH:mm:SS");
 	}	
 	
-	
+	@Override
+	public boolean equals(Object obj) {
+		ProductiveDate that = (ProductiveDate) obj;
+		if(this.day==null && that.day==null)
+			return true;
+		if(this.day.equals(that.day))
+			return true;
+		else
+			return false;
+	}
 	
 }
