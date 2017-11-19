@@ -1,10 +1,12 @@
 package shared;
+import java.util.Date;
+
 import org.json.simple.*;
 import org.json.simple.JSONObject;
 
 public class Note {
-	private ProductiveDate createdDate = null;
-	private ProductiveDate updatedLastDate = null;
+	private Date createdDate = null;
+	private Date updatedLastDate = null;
 	private String body = null;
 	private String title = null;
 	private String noteId = null;
@@ -23,13 +25,15 @@ public class Note {
 		if(jsonIn.get(UPDATED_LAST_DATE_KEY)!=null) {
 			updatedDateStr = jsonIn.get(UPDATED_LAST_DATE_KEY).toString();
 		}
-
-		setCreatedDate(new ProductiveDate(createdDateStr));
-		setUpdatedLastDate(new ProductiveDate(updatedDateStr));
+		try {
+		createdDate = new DateUtil().parseRFC3339Date(jsonIn.get(CREATED_DATE_KEY).toString());
+		updatedLastDate = new DateUtil().parseRFC3339Date(jsonIn.get(UPDATED_LAST_DATE_KEY).toString());
+		} catch (Exception e) {
+			System.out.println("Parese error for date in note.java: " + e.getMessage());
+		}
 	}
 	
 	public Note() {
-		createdDate = new ProductiveDate();
 	}
 	
 	/**
@@ -57,21 +61,17 @@ public class Note {
 	
 	
 // Getters and Setters:
-	public ProductiveDate getCreatedDate() {
+	public Date getCreatedDate() {
 		return createdDate;
 	}
 
-	public void setCreatedDate(ProductiveDate createdDate) {
-		this.createdDate = createdDate;
-	}
+	
 
-	public ProductiveDate getUpdatedLastDate() {
+	public Date getUpdatedLastDate() {
 		return updatedLastDate;
 	}
 
-	public void setUpdatedLastDate(ProductiveDate updatedLastDate) {
-		this.updatedLastDate = updatedLastDate;
-	}
+
 
 	public String getBody() {
 		return body;

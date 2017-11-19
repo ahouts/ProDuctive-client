@@ -2,7 +2,7 @@ package shared;
 import java.util.ArrayList;
 import org.json.simple.*;
 
-public class jsonUtil {
+public class JsonUtil {
 
 	public static ArrayList<Note> makeManyNotes(JSONArray jsonArrayIn) {
 		ArrayList<Note> notes = new ArrayList<Note>();
@@ -29,9 +29,10 @@ public class jsonUtil {
 	 * @returns an arraylist of the jsonArray in
 	 */
 	private static ArrayList<JSONObject> makeManyJSONs(JSONArray jsonArrayIn){
+		
 		ArrayList<JSONObject> jsonObjectsToReturn = new ArrayList<JSONObject>();
 		int i = 0;
-		while(jsonArrayIn.get(i)!=null) {
+		while(i<jsonArrayIn.size()) {
 			jsonObjectsToReturn.add((JSONObject) jsonArrayIn.get(i));
 			i++;
 		}

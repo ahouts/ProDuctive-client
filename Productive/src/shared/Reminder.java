@@ -1,10 +1,18 @@
 package shared;
+import java.util.ArrayList;
+import java.util.Date;
+
+import javax.jws.soap.SOAPBinding.Use;
+
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class Reminder {
 	private String reminderId = null;
 	private String body = null;
-	private ProductiveDate createdDate = null;
+	private Date createdDate = null;
 	
 	public Reminder(JSONObject jsonIn) {
 		setReminderId(jsonIn.get(REMINDER_ID_KEY).toString());
@@ -12,12 +20,15 @@ public class Reminder {
 		
 		String dateStr = jsonIn.get(CREATED_DATE_KEY).toString();
 		
-		setCreatedDate(new ProductiveDate(dateStr));
+		try {
+			createdDate = new DateUtil().parseRFC3339Date(jsonIn.get(CREATED_DATE_KEY).toString());
+		} catch (Exception e) {
+			System.out.println("Parse error in reminders.java: " + e.getMessage());
+		}
 	}
 	
 	public Reminder(String body) {
 		setBody(body);
-		createdDate = new ProductiveDate();
 	}
 	
 	public Reminder() {};
@@ -27,16 +38,41 @@ public class Reminder {
 	 * Due to this, this method will return a jsonObject with no reminderID
 	 * @return 
 	 */
-	public JSONObject encodeToJson() {
+	public JSONObject encodeToJson(UserInfo userInfo) {
 		JSONObject jsonObj = new JSONObject();
 		jsonObj.put(Reminder.BODY_KEY, body);
-		jsonObj.put(Reminder.CREATED_DATE_KEY, createdDate.toString());
+		jsonObj.put(UserInfo.EMAIL_KEY, userInfo.getUserEmail());
+		jsonObj.put(userInfo.PASSWORD_KEY, userInfo.getUserPassword());
 		return jsonObj;
+	}
+	public static JSONObject encodeDeleteJson(UserInfo userInfo) {
+		JSONObject jsonObj = new JSONObject();
+		jsonObj.put(UserInfo.EMAIL_KEY, userInfo.getUserEmail());
+		jsonObj.put(userInfo.PASSWORD_KEY, userInfo.getUserPassword());
+		return jsonObj;
+	} 
+	
+	
+	public static ArrayList<Reminder> parseReminder(String input) {
+		ArrayList<Reminder> reminders = null;
+		System.out.println(input);
+		JSONArray jsonArray = null;
+		JSONParser parser = new JSONParser();
+		try {
+			 jsonArray = (JSONArray) parser.parse(input);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		reminders = JsonUtil.makeManyReminders(jsonArray);
+				
+		return reminders;
 	}
 	
 	@Override
 	public String toString() {
-		return "Body: " + getBody().substring(0, 100) + "\n" +
+		return "Body: " + getBody() + "\n" +
 				"reminderId: " + getReminderId() + "\n" +
 				"createdDate: " + getCreatedDate() + "\n";
 	}
@@ -58,16 +94,13 @@ public class Reminder {
 		this.body = body;
 	}
 
-	public ProductiveDate getCreatedDate() {
+	public Date getCreatedDate() {
 		return createdDate;
 	}
 
-	private void setCreatedDate(ProductiveDate createdDate) {
-		this.createdDate = createdDate;
-	}
 
 	// Public static variables
-	public static final String BODY_KEY = "body";
-	public static final String REMINDER_ID_KEY = "reminderId";
-	public static final String CREATED_DATE_KEY = "created_at";	
+	public static final String BODY_KEY = "Body";
+	public static final String REMINDER_ID_KEY = "Id";
+	public static final String CREATED_DATE_KEY = "CreatedAt";	
 }

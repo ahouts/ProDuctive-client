@@ -1,8 +1,8 @@
 package backend;
 
-public class pushRequest {
+public class PushRequest {
 
-	public pushRequest() {
+	public PushRequest() {
 		// TODO Auto-generated constructor stub
 		
 	}
