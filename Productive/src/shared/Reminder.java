@@ -55,7 +55,6 @@ public class Reminder {
 	
 	public static ArrayList<Reminder> parseReminder(String input) {
 		ArrayList<Reminder> reminders = null;
-		System.out.println(input);
 		JSONArray jsonArray = null;
 		JSONParser parser = new JSONParser();
 		try {

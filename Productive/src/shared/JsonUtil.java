@@ -24,11 +24,20 @@ public class JsonUtil {
 		return reminders;
 	}
 	
+	public static ArrayList<Project> makeManyProjects(JSONArray jsonArrayIn) {
+		ArrayList<Project> projects = new ArrayList<>();
+		ArrayList<JSONObject> jsonObjectsToParse = makeManyJSONs(jsonArrayIn);
+		for (JSONObject jsonObject: jsonObjectsToParse) {
+			
+		}
+		return projects;
+	}
+	
 	/*
 	 * Helper for the makeManyNotes and makeManyReminders.
 	 * @returns an arraylist of the jsonArray in
 	 */
-	private static ArrayList<JSONObject> makeManyJSONs(JSONArray jsonArrayIn){
+	public static ArrayList<JSONObject> makeManyJSONs(JSONArray jsonArrayIn){
 		
 		ArrayList<JSONObject> jsonObjectsToReturn = new ArrayList<JSONObject>();
 		int i = 0;

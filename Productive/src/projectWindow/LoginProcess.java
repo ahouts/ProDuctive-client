@@ -100,10 +100,18 @@ public class LoginProcess {
         
         panel.add(new JLabel("email"));
         panel.add(field1);
+        
+        
         panel.add(new JLabel("password"));
         panel.add(field2);
+
+        // test stuff
+        field1.setText("fred@gmail.com");
+        field2.setText("ser derp");
+        
         int result = JOptionPane.showConfirmDialog(null, panel, "Login",
             JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        
         if (result == JOptionPane.OK_OPTION) {
         		UserInfo myUser = new UserInfo(field1.getText(),field2.getText());
         		UserInfo userToUse = null;
@@ -113,6 +121,9 @@ public class LoginProcess {
       		} catch (Exception e) {
       			showLoginWindow();
       		}
+        		if (userToUse == null) {
+        			showLoginWindow();
+        		}
         		BigWindow.show(userToUse);
         } else {
         	System.exit(0);
@@ -122,18 +133,12 @@ public class LoginProcess {
 	// TODO: actually check the password
 	
 	private void tryToCreateAccount(UserInfo userInfo) {
-		boolean isGood = false;
 		try {
 			  new HTTPRequests().createAccount(userInfo);
 		} catch (Exception e) {
 			showMainWindow();
-		}		
-	}
-	private void showBadAccount() {
-		
+		}	
+		showMainWindow();
 	}
 	
-		
-	
-
 }
