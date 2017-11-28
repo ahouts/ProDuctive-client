@@ -70,7 +70,9 @@ public class Note {
 		jsonOut.put(UserInfo.PASSWORD_KEY, userInfo.getUserPassword());
 		jsonOut.put(TITLE_KEY, getTitle());
 		jsonOut.put(BODY_KEY, getBody());
-		jsonOut.put(OWNER_ID_KEY, Long.parseLong(ownnerId));
+		// Do I need this for creating notes?
+		if (ownnerId!=null)
+			jsonOut.put(OWNER_ID_KEY, Long.parseLong(ownnerId));
 		jsonOut.put(PROJECT_ID_KEY, nestedJSON);
 		
 		return jsonOut;

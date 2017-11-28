@@ -115,7 +115,7 @@ public static void show(UserInfo userInfo) {
 		noteEditor.setRows(10);
 		NotePanel.add(noteEditor);
 		NotePanel.add(DatePanel);
-		DatePanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		DatePanel.setLayout(new BoxLayout(DatePanel, BoxLayout.Y_AXIS));
 		CreatedAtLabel.setFont(new Font("Lucida Grande", Font.BOLD, 13));
 		
 		DatePanel.add(CreatedAtLabel);
@@ -193,7 +193,7 @@ public static void show(UserInfo userInfo) {
 		noteTitleField.setColumns(10);
 		frmProductive = new JFrame();
 		frmProductive.setTitle("Productive");
-		frmProductive.setBounds(100, 100, 1200, 600);
+		frmProductive.setBounds(100, 100, 800, 450);
 		frmProductive.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmProductive.getContentPane().setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
@@ -306,16 +306,17 @@ public static void show(UserInfo userInfo) {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
+				if(activeNote == null) {
+					warn("Please use the Note+ button before trying to save");
+					return;
+				}
+				
 				if(noteTitleField.getText()==null||noteTitleField.getText().equals("")) {
 					warn("You need a title before you save a note");
 					return;
 				}
-				if(NoteList.isSelectionEmpty()) {
-					warn("You need to select a note from the notelist before saving");
-					return;
-				}
-				
-				if(activeNote !=null && activeNote.isNew() && isFormatGood()) {
+				// IS this a new note
+				if(activeNote.isNew() && isFormatGood()) {
 					activeNote.setBody(noteEditor.getText());
 					activeNote.setTitle(noteTitleField.getText());
 					if(getSelectedProjectProperID()==(Project.NO_PROJECT_ID)) 
@@ -324,11 +325,15 @@ public static void show(UserInfo userInfo) {
 						activeNote.setProjectID(getSelectedProjectProperID());
 					userSuite.createNewNote(activeNote);
 					updateModel();
-				}else {
+					// Or is it an old note
+				}else if (isFormatGood()){
 					activeNote.setBody(noteEditor.getText());
 					userSuite.updateNote(activeNote);
 					updateModel();
-				}	
+				} else {
+					warn("Incorrect Format");
+					return;
+				}
 				warn("Note Saved!");
 			}
 			
@@ -432,8 +437,10 @@ public static void show(UserInfo userInfo) {
 			return false;
 		if (this.noteEditor.getText()==null||this.noteEditor.getText().equals(""))
 			return false;
+		/*
 		if (this.ProjectList.getSelectedValue()==null)
 			return false;
+		*/
 		return true;
 	}
 	private long getSelectedProjectProperID() {

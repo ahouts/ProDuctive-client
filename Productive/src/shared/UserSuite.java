@@ -58,7 +58,7 @@ public class UserSuite {
 		remindersArray.clear();
 		ArrayList<Reminder> newReminders = new HTTPRequests().getAllReminders(myUser);
 		for(Reminder r: newReminders) {
-			ReminderList.addElement(r.getBody() + " | Created:" + r.getCreatedDate());
+			ReminderList.addElement("<html><b>" + r.getBody() + "</b><br> Created on " + r.getCreatedDate() + "</html>");
 			remindersArray.add(r);
 		}
 		
