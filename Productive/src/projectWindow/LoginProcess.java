@@ -5,6 +5,7 @@ import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.JButton;
@@ -105,9 +106,7 @@ public class LoginProcess {
         panel.add(new JLabel("password"));
         panel.add(field2);
 
-        // test stuff
-        field1.setText("fred@gmail.com");
-        field2.setText("ser derp");
+       
         
         int result = JOptionPane.showConfirmDialog(null, panel, "Login",
             JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
@@ -119,12 +118,15 @@ public class LoginProcess {
       			userToUse = new HTTPRequests().checkUserInfo(myUser);
 
       		} catch (Exception e) {
+      			
       			showLoginWindow();
       		}
         		if (userToUse == null) {
         			showLoginWindow();
         		}
         		BigWindow.show(userToUse);
+        } else if(result==JOptionPane.CANCEL_OPTION) {
+  			showMainWindow();
         } else {
         	System.exit(0);
         }
@@ -133,12 +135,21 @@ public class LoginProcess {
 	// TODO: actually check the password
 	
 	private void tryToCreateAccount(UserInfo userInfo) {
-		try {
-			  new HTTPRequests().createAccount(userInfo);
-		} catch (Exception e) {
-			showMainWindow();
-		}	
+			  try {
+				new HTTPRequests().createAccount(userInfo);
+			} catch (RuntimeException e) {
+				warn("Cannot create this account");
+			} catch (Exception e) {
+				warn("An error occured");
+			}
 		showMainWindow();
 	}
 	
+
+	private void warn() {
+		warn("An error has occured");
+	}
+	private void warn(String strToShow) {
+		JOptionPane.showMessageDialog(null, strToShow);
+}
 }

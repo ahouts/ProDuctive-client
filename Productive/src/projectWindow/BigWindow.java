@@ -6,6 +6,7 @@ import javax.swing.JFrame;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.JLabel;
 import javax.swing.JButton;
@@ -14,6 +15,7 @@ import javax.swing.JOptionPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import backend.HTTPRequests;
 import shared.DateUtil;
 import shared.Note;
 import shared.Project;
@@ -66,64 +68,18 @@ public static void show(UserInfo userInfo) {
 	
 	public void updateModel() {
 		activeNote = null;
-		ProgramOptionsPanel.setBackground(Color.LIGHT_GRAY);
+		panel.add(UserName);
 		
-		MiscPanel.add(ProgramOptionsPanel);
-		ProgramOptionsPanel.setLayout(new BoxLayout(ProgramOptionsPanel, BoxLayout.X_AXIS));
-		ProgramOptionsPanel.add(UserName);
 		this.UserName.setText(this.userSuite.getUserName());
-		ProgramOptionsPanel.add(LogoutButton);
 		
-		MiscPanel.add(ReminderPanel);
-		ReminderPanel.setLayout(new BoxLayout(ReminderPanel, BoxLayout.Y_AXIS));
-		ReminderPanel.add(ReminderTitlePanel);
-		ReminderTitlePanel.setLayout(new BoxLayout(ReminderTitlePanel, BoxLayout.X_AXIS));
-		ReminderTitlePanel.add(ReminderLabel);
-		ReminderLabel.setHorizontalAlignment(SwingConstants.LEFT);
-		ReminderLabel.setFont(new Font("Lucida Grande", Font.BOLD, 18));
-		ReminderPanel.add(ReminderOptions);
-		ReminderOptions.setLayout(new BoxLayout(ReminderOptions, BoxLayout.X_AXIS));
-		ReminderPanel.add(ReminderList);
 		this.ReminderList.setModel(userSuite.refreshReminders());
 		
-		MiscPanel.add(ProjectPanel);
-		ProjectPanel.setLayout(new BoxLayout(ProjectPanel, BoxLayout.Y_AXIS));
-		ProjectPanel.add(ProjectTitlePanel);
-		ProjectTitlePanel.setLayout(new BoxLayout(ProjectTitlePanel, BoxLayout.X_AXIS));
-		ProjectTitlePanel.add(ProjectLabel);
-		ProjectLabel.setFont(new Font("Lucida Grande", Font.BOLD, 18));
-		ProjectPanel.add(ProjectOptionsPanel);
-		ProjectOptionsPanel.setLayout(new BoxLayout(ProjectOptionsPanel, BoxLayout.X_AXIS));
-		ProjectPanel.add(ProjectList);
+		
 		this.ProjectList.setModel(userSuite.refreshProjectList());
 		long index = 0;
-		NotePanel.add(NoteListTitle);
-		NoteListTitle.setLayout(new BoxLayout(NoteListTitle, BoxLayout.X_AXIS));
-		NotePanel.add(NoteOptionsPanel);
-		NoteOptionsPanel.setLayout(new BoxLayout(NoteOptionsPanel, BoxLayout.X_AXIS));
-		NotePanel.add(NoteList);
+		
 		this.NoteList.setModel(userSuite.refreshNoteList(index));
-		NotePanel.add(titlePanel);
 		
-		NotePanel.add(BodyLabelPanel);
-		BodyLabel.setFont(new Font("Lucida Grande", Font.BOLD, 12));
-		
-		BodyLabelPanel.add(BodyLabel);
-		noteEditor.setFont(new Font("Arial", Font.PLAIN, 15));
-		noteEditor.setLineWrap(true);
-		noteEditor.setColumns(20);
-		noteEditor.setRows(10);
-		NotePanel.add(noteEditor);
-		NotePanel.add(DatePanel);
-		DatePanel.setLayout(new BoxLayout(DatePanel, BoxLayout.Y_AXIS));
-		CreatedAtLabel.setFont(new Font("Lucida Grande", Font.BOLD, 13));
-		
-		DatePanel.add(CreatedAtLabel);
-		DatePanel.add(noteCreatedDateLabel);
-		UpdatedLast.setFont(new Font("Lucida Grande", Font.BOLD, 13));
-		
-		DatePanel.add(UpdatedLast);
-		DatePanel.add(noteUpdatedLastDateLabel);
 	}
 	public void updateNoteModel() {
 		this.NoteList.setModel(userSuite.refreshNoteList(activeProjectID));
@@ -182,12 +138,15 @@ public static void show(UserInfo userInfo) {
 	private final JPanel NoteListTitle = new JPanel();
 	private final JPanel BodyLabelPanel = new JPanel();
 	private final JLabel BodyLabel = new JLabel("Body:");
+	private final JButton RefreshButton = new JButton("Refresh");
+	private final JButton StatsButton = new JButton("Stats");
+	private final JPanel panel = new JPanel();
+	private final JButton HelpButton = new JButton("Help");
 
 	private void initialize() {
 		ReminderList.setFixedCellHeight(40);
 		titlePanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		lblNewLabel.setFont(new Font("Lucida Grande", Font.BOLD, 12));
-		
 		titlePanel.add(lblNewLabel);
 		titlePanel.add(noteTitleField);
 		noteTitleField.setColumns(10);
@@ -196,17 +155,70 @@ public static void show(UserInfo userInfo) {
 		frmProductive.setBounds(100, 100, 800, 450);
 		frmProductive.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmProductive.getContentPane().setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-		
 		frmProductive.getContentPane().add(MainPanel);
 		MainPanel.setLayout(new BoxLayout(MainPanel, BoxLayout.X_AXIS));
 		MainPanel.add(MiscPanel);
 		MiscPanel.setLayout(new BoxLayout(MiscPanel, BoxLayout.Y_AXIS));
 		MainPanel.add(horizontalStrut);
-		
 		MainPanel.add(NotePanel);
 		NotePanel.setLayout(new BoxLayout(NotePanel, BoxLayout.Y_AXIS));
 		NoteListTitle.add(NotesList);
 		NotesList.setFont(new Font("Lucida Grande", Font.BOLD, 18));
+		
+		MiscPanel.add(panel);
+		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+		ProgramOptionsPanel.setBackground(Color.LIGHT_GRAY);
+		MiscPanel.add(ProgramOptionsPanel);
+		ProgramOptionsPanel.setLayout(new BoxLayout(ProgramOptionsPanel, BoxLayout.X_AXIS));
+		ProgramOptionsPanel.add(LogoutButton);	
+		
+		ProgramOptionsPanel.add(RefreshButton);
+		
+		ProgramOptionsPanel.add(HelpButton);
+		
+		ProgramOptionsPanel.add(StatsButton);
+		MiscPanel.add(ReminderPanel);
+		ReminderPanel.setLayout(new BoxLayout(ReminderPanel, BoxLayout.Y_AXIS));
+		ReminderPanel.add(ReminderTitlePanel);
+		ReminderTitlePanel.setLayout(new BoxLayout(ReminderTitlePanel, BoxLayout.X_AXIS));
+		ReminderTitlePanel.add(ReminderLabel);
+		ReminderLabel.setHorizontalAlignment(SwingConstants.LEFT);
+		ReminderLabel.setFont(new Font("Lucida Grande", Font.BOLD, 18));
+		ReminderPanel.add(ReminderOptions);
+		ReminderOptions.setLayout(new BoxLayout(ReminderOptions, BoxLayout.X_AXIS));
+		ReminderPanel.add(ReminderList);
+		MiscPanel.add(ProjectPanel);
+		ProjectPanel.setLayout(new BoxLayout(ProjectPanel, BoxLayout.Y_AXIS));
+		ProjectPanel.add(ProjectTitlePanel);
+		ProjectTitlePanel.setLayout(new BoxLayout(ProjectTitlePanel, BoxLayout.X_AXIS));
+		ProjectTitlePanel.add(ProjectLabel);
+		ProjectLabel.setFont(new Font("Lucida Grande", Font.BOLD, 18));
+		ProjectPanel.add(ProjectOptionsPanel);
+		ProjectOptionsPanel.setLayout(new BoxLayout(ProjectOptionsPanel, BoxLayout.X_AXIS));
+		ProjectPanel.add(ProjectList);
+		NotePanel.add(NoteListTitle);
+		NoteListTitle.setLayout(new BoxLayout(NoteListTitle, BoxLayout.X_AXIS));
+		NotePanel.add(NoteOptionsPanel);
+		NoteOptionsPanel.setLayout(new BoxLayout(NoteOptionsPanel, BoxLayout.X_AXIS));
+		NotePanel.add(NoteList);
+		NotePanel.add(titlePanel);
+		NotePanel.add(BodyLabelPanel);
+		BodyLabel.setFont(new Font("Lucida Grande", Font.BOLD, 12));
+		BodyLabelPanel.add(BodyLabel);
+		noteEditor.setWrapStyleWord(true);
+		noteEditor.setFont(new Font("Arial", Font.PLAIN, 15));
+		noteEditor.setLineWrap(true);
+		noteEditor.setColumns(20);
+		noteEditor.setRows(10);
+		NotePanel.add(noteEditor);
+		NotePanel.add(DatePanel);
+		DatePanel.setLayout(new BoxLayout(DatePanel, BoxLayout.Y_AXIS));
+		CreatedAtLabel.setFont(new Font("Lucida Grande", Font.BOLD, 13));
+		DatePanel.add(CreatedAtLabel);
+		DatePanel.add(noteCreatedDateLabel);
+		UpdatedLast.setFont(new Font("Lucida Grande", Font.BOLD, 13));
+		DatePanel.add(UpdatedLast);
+		DatePanel.add(noteUpdatedLastDateLabel);
 		
 		addActionListeners();
 	}
@@ -221,7 +233,8 @@ public static void show(UserInfo userInfo) {
 	                    frmProductive,
 	                    "New Reminder?",
 	                    JOptionPane.PLAIN_MESSAGE);
-				System.out.println(s);
+				if (s==null||s.equals(""))
+					return;
 				userSuite.insertNewReminder(s);
 				userSuite.refreshReminders();
 			}
@@ -233,8 +246,14 @@ public static void show(UserInfo userInfo) {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				
 				int i = ReminderList.getSelectedIndex();
-				userSuite.deleteReminder(i);
+				if(i>-1) {
+					userSuite.deleteReminder(i);
+				} else {
+					warn("Please select a reminder before trying to delete it");
+				}
+				
 				userSuite.refreshReminders();
 			}
 		});
@@ -272,10 +291,11 @@ public static void show(UserInfo userInfo) {
 				noteID = getSelectedNoteID();
 				System.out.println("noteIDIS: " +noteID);
 				if (noteID < 0) {
-					warn(AllStr.INDEX_OUT_OF_BOUNDS);
+					warn("Please select a note before trying to share it.");
 					return;
 				} else {
 					String usernameToShareWith = userToAdd();
+					
 				
 					try {
 						 userIDToShareWith = userSuite.getUserIDFromStr(usernameToShareWith);
@@ -307,7 +327,8 @@ public static void show(UserInfo userInfo) {
 			public void actionPerformed(ActionEvent e) {
 				
 				if(activeNote == null) {
-					warn("Please use the Note+ button before trying to save");
+					warn("Please use the Note+ button before trying to save,\n"
+							+ "or select an exisiting note from the notelist.");
 					return;
 				}
 				
@@ -343,12 +364,15 @@ public static void show(UserInfo userInfo) {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				Note noteToDelete;
-				if(NoteList.getSelectedValue()!=null)
+				if(NoteList.getSelectedValue()==null)
 				{
+					warn("Please select a note before trying to delete.");
+					return;
+				}
 					noteToDelete = userSuite.getNoteAtIndex(NoteList.getSelectedIndex());
 					userSuite.deleteNote(noteToDelete);
 					updateNoteModel();
-				}
+				
 				
 			}
 		});
@@ -357,7 +381,9 @@ public static void show(UserInfo userInfo) {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				activeNote = new Note();
-				noteEditor.setText("Put your text here :)");
+				noteEditor.setText("New Body");
+				noteTitleField.setText("New Note");
+				
 				
 				
 			}
@@ -372,7 +398,8 @@ public static void show(UserInfo userInfo) {
 		                    frmProductive,
 		                    "New Project?",
 		                    JOptionPane.PLAIN_MESSAGE);
-					System.out.println(s);
+					if (s==null||s.equals(""))
+						return;
 					userSuite.inserNewProject(s);
 					userSuite.refreshProjectList();
 				
@@ -385,7 +412,7 @@ public static void show(UserInfo userInfo) {
 			public void actionPerformed(ActionEvent e) {
 				Long ProjectIdToDelete = getSelectedProjectProperID();
 				if (ProjectIdToDelete==Project.NO_PROJECT_ID)
-					warn("cannot delete this projectr");
+					warn("Please select a project besides All Notes before deleting.");
 				else {
 					userSuite.deleteProject(ProjectIdToDelete);
 					updateModel();
@@ -430,7 +457,46 @@ public static void show(UserInfo userInfo) {
 	                    JOptionPane.PLAIN_MESSAGE);
 				return s;
 			}
-		});		
+		});	
+		LogoutButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.exit(0);
+			}
+		});
+		RefreshButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				updateModel();
+				
+			}
+		});
+		StatsButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String strToShow = "Could not get stats";
+				try {
+					 strToShow = new HTTPRequests().getStats();
+				} catch (Exception es) {
+					strToShow = "Could not get stats";
+				}
+				warn(strToShow);
+	
+				
+				
+			}
+		});
+		HelpButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				warn(AllStr.HELP_NOTE);
+				
+			}
+		});
 	}
 	private boolean isFormatGood() {
 		if (this.noteTitleField==null||this.noteTitleField.equals(""))

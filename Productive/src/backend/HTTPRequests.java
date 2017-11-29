@@ -38,28 +38,22 @@ public class HTTPRequests {
 	
 
 	public ArrayList<Note> getNotesFromProject(Long projectID, UserInfo myUserInfo) {
+		if (projectID==0) {
+			return getAllNotes(myUserInfo);
+		}
 		
 		ArrayList<Note> newNotes = new ArrayList<>();
 		try {
-			String input = this.getAllNotesRequest(myUserInfo);
+			String input = this.getNoteFromProject(myUserInfo, projectID);
 			JSONParser parser = new JSONParser();
-			newNotes = JsonUtil.makeManyNotes((JSONArray)parser.parse(input));
-			ArrayList<Note> newerNotes = new ArrayList<>();
-			for(Note n: newNotes) {
-				if(projectID != Project.NO_PROJECT_ID && n.getProjectId()==projectID)
-					newerNotes.add(n);
-				else if (projectID == Project.NO_PROJECT_ID)
-					newerNotes.add(n);
-			}
-			newNotes = newerNotes;
-			
+			newNotes = JsonUtil.makeManyNotes((JSONArray)parser.parse(input));			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return newNotes;
 	}
-	
+
 	public ArrayList<Note> getAllNotes(UserInfo myUserInfo) {
 		System.out.println("getting notes");
 		ArrayList<Note> newNotes = new ArrayList<>();
@@ -187,8 +181,82 @@ public class HTTPRequests {
 		shareNoteRequest(noteID,userIDToShareWith,myUser);
 		
 	}
+	public String getStats() throws Exception {
+		String jsonStr = getStatsRequest();
+		System.out.println("JSSTR is " + jsonStr);
+		JSONParser parser = new JSONParser();
+		JSONObject jsObj =  (JSONObject) parser.parse(jsonStr);
+		return (String)jsObj.get("Text");
+	}
 	
-	
+	private String getStatsRequest() throws Exception{
+		  URL url = new URL(this.getStats);
+	      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+	      conn.setDoOutput(true);
+	      conn.setRequestMethod("GET");
+	    
+	      if (conn.getResponseCode() >= HttpURLConnection.HTTP_BAD_REQUEST) {
+	    	  		byte[] bytes = new byte[5000];
+	    	  		conn.getErrorStream().read(bytes);
+	    	  		System.out.println(new String(bytes, StandardCharsets.UTF_8));
+	    	  		throw new RuntimeException("Failed Project : HTTP error code : "
+	                + conn.getResponseCode()+ conn.getResponseMessage());
+	      }	   
+	      
+	      BufferedReader br = new BufferedReader(new InputStreamReader(
+	                (conn.getInputStream())));
+
+	        String output;
+	        String retStr="";
+	        while ((output = br.readLine()) != null) {
+	        		System.out.println(output);
+	            	retStr+=output;
+	        }
+	        conn.disconnect();
+	        return retStr;
+	}
+
+	private String getNoteFromProject(UserInfo myUserInfo, Long projectID) throws Exception{
+		  URL url = new URL(this.getProjects+"/"+projectID+"/notes");
+	      int length = myUserInfo.encodeToJson().toJSONString().getBytes("UTF-8").length;
+	      String lengthStr = Integer.toString(length);
+	      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+	      conn.setDoOutput(true);
+	      conn.setRequestMethod("PUT");
+	      conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+	      conn.setRequestProperty("Content-Length", lengthStr);
+	      
+	      String strToWrite = myUserInfo.encodeToJson().toJSONString() + "\n";
+	      
+	      OutputStream os = conn.getOutputStream();
+	      os.write(strToWrite.getBytes("UTF-8"));
+	      os.flush();
+	      os.close();
+	      
+	      
+	      if (conn.getResponseCode() >= HttpURLConnection.HTTP_BAD_REQUEST) {
+	    	  		byte[] bytes = new byte[5000];
+	    	  		conn.getErrorStream().read(bytes);
+	    	  		System.out.println(new String(bytes, StandardCharsets.UTF_8));
+	    	  		throw new RuntimeException("Failed Project : HTTP error code : "
+	                + conn.getResponseCode()+ conn.getResponseMessage());
+	            
+	      }	   
+	      
+	      BufferedReader br = new BufferedReader(new InputStreamReader(
+	                (conn.getInputStream())));
+
+	        String output;
+	        String retStr="";
+	        while ((output = br.readLine()) != null) {
+	        		System.out.println(output);
+	            	retStr+=output;
+	        }
+	        conn.disconnect();
+	        
+	        
+	        return retStr;
+	}
 	
 	
 	private String shareNoteRequest(long noteID, long userIDToShareWith, UserInfo myUser) throws Exception{
@@ -895,23 +963,10 @@ public class HTTPRequests {
 	
 	public static void fatalError(String errorStr) 
 	{
-		try {
-		 EventQueue.invokeAndWait(new Runnable() {
-
-			@Override
-			public void run() {
-					JOptionPane.showMessageDialog(null, errorStr);
-					System.exit(0);
-			}
-
-		 });
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-
+			JOptionPane.showMessageDialog(null, "An error has occured.");
+			return;
 	}
 
-	//https://productive.ahouts.com/reminder/get
 	private static final String host = "https://productive.ahouts.com/";
 	private static final String getReminderURL = host + "reminder";
 	private static final String insertReminderURL = host + "reminder";
@@ -922,8 +977,9 @@ public class HTTPRequests {
 	private static final String getAllNotes = host + "note";
 	private static final String deleteNote = getAllNotes + "/delete/";
 	private static final String deleteProject = getProjects + "/delete/";
+	private static final String getStats = host + "stats";
 	
-	
+
 	
 	
 	
